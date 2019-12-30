@@ -53,7 +53,8 @@ with tf.name_scope("rnn"):
         lstm = tf.contrib.rnn.BasicLSTMCell(lstm_hiden_size)
         # 添加dropout
         drop_lstm = tf.contrib.rnn.DropoutWrapper(lstm, output_keep_prob=keep_prob)
-        cell = tf.contrib.rnn.MultiRNNCell([drop_lstm]*lstm_hiden_layers)
+        #cell = tf.contrib.rnn.MultiRNNCell([drop_lstm]*lstm_hiden_layers)
+        cell = tf.nn.rnn_cell.MultiRNNCell([ tf.nn.rnn_cell.BasicLSTMCell(lstm_hiden_size) for _ in range(lstm_hiden_layers)])
         initial_state_l = cell.zero_state(batch_size,tf.float32)
         ot, lstm_state = tf.nn.dynamic_rnn(cell=cell,inputs=embed, initial_state=initial_state_l)
         
@@ -110,12 +111,13 @@ with tf.Session() as sess:
             _, l = sess.run([optimizer, loss], feed_dict={inputs: x_batch, targets: y_batch[:,None], keep_prob:keep_prob_num})#'''np.reshape(y_batch, (-1,1))'''
             total_loss += l
             iteration = iteration + 1 
-        for x_dbatch, y_dbatch in get_batch(train_fea, train_label):
+        for x_dbatch, y_dbatch in get_batch(dev_fea, dev_label):
             batch_acc = sess.run([accuracy], feed_dict={inputs:x_dbatch, targets:y_dbatch[:,None],keep_prob:1.0})
             dev_cnt = dev_cnt + 1
-            if(dev_cnt >20):
+            if(dev_cnt > -1):
                 dev_cnt_real = dev_cnt_real + 1
                 dev_acc = dev_acc + batch_acc[0]
+                print(batch_acc)
         '''
         train_corrects = sess.run(accuracy, feed_dict={inputs: train_fea, targets: np.reshape(train_label,  (-1,1) )})
         train_acc = train_corrects / train_fea.shape[0]
@@ -126,8 +128,9 @@ with tf.Session() as sess:
         rnn_test_accuracy.append(test_acc)
         '''
 
-        test_acc = dev_acc/dev_cnt_real
-        print("Training epoch: {}, Train loss: {:.4f},  Test accuracy: {:.4f}".format(epoch + 1,  total_loss / n_batches, test_acc))
+        #print("dev_cnt_real "+str(dev_cnt_real))
+        dev_acc = dev_acc/dev_cnt_real
+        print("Training epoch: {}, Train loss: {:.4f},  dev accuracy: {:.4f}".format(epoch + 1,  total_loss / n_batches, dev_acc))
     
     saver.save(sess, "checkpoints/rnn")
     writer.close()
@@ -142,3 +145,17 @@ plt.ylim(ymin=0.5, ymax=1.01)
 plt.title("The accuracy of LSTM model")
 plt.legend(["train", "test"])
 
+dev_cnt= 0
+dev_cnt_real = 0
+dev_acc = 0.0
+with tf.Session() as sess:
+    saver.restore(sess, "checkpoints/rnn")
+    for x_tbatch, y_tbatch in get_batch(test_fea, test_label):
+            batch_acc = sess.run([accuracy], feed_dict={inputs:x_tbatch, targets:y_tbatch[:,None],keep_prob:1.0})
+            dev_cnt = dev_cnt + 1
+            if(dev_cnt > -1):
+                dev_cnt_real = dev_cnt_real + 1
+                dev_acc = dev_acc + batch_acc[0]
+
+dev_acc = dev_acc/dev_cnt_real
+print("Test accuracy: {:.4f}".format(dev_acc))
