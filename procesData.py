@@ -82,7 +82,7 @@ vocab = sorted(count,key=count.get,reverse=True)
 
 vocab_to_int = {word:i for i,word in enumerate(vocab,1)}
 
-print("len(vocab_to_int) = " + str(len(vocab_to_int)))
+print("len(vocab_to_int) = " + str(len(vocab_to_int))) #21337
 
 
 ## 3 encoding word and label train dev test 
@@ -92,10 +92,14 @@ from tensorflow.contrib.keras import preprocessing
 train_reviews_ints = []
 for each in train_rev:
     train_reviews_ints.append([vocab_to_int[word] for word in each.split()])
+
+
 '''
 review_lens = Counter([len(x) for x in reviews_ints])
 print("Zero-length reviews: {}".format(review_lens[0]))
 print("Maximum review length: {}".format(max(review_lens)))
+
+'''
 '''
 features = np.zeros((len(train_reviews_ints),seq_len),dtype=int)
 features = preprocessing.sequence.pad_sequences(train_reviews_ints,52)
@@ -120,3 +124,19 @@ labels = np.array([int(each) for each in labels])
 
 np.save("./data/devFea.npy",features)
 np.save("./data/devLabel.npy",labels)
+'''
+test_reviews_ints = []
+for each in test_rev:
+    test_reviews_ints.append([vocab_to_int[word] for word in each.split()])
+
+features = np.zeros((len(test_reviews_ints),seq_len),dtype=int)
+features = preprocessing.sequence.pad_sequences(test_reviews_ints,52)
+
+labels = test_labes.split('\n')
+labels.pop()
+labels = np.array([int(each) for each in labels])
+
+np.save("./data/testFea.npy",features)
+np.save("./data/testLabel.npy",labels)
+print(features.shape)#(2200, 52)
+print(labels.shape)#(2200,)
