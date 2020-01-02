@@ -6,3 +6,6 @@
 /uselessdata/
 /graphs/
 /checkpoints/
+*.zip
+*.docx
+*.pdf

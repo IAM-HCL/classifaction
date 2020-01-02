@@ -1,5 +1,5 @@
 import numpy as np
-
+embed_size = 300
 reviews = ''
 train_rev = ''
 dev_rev = ''
@@ -81,9 +81,13 @@ count = Counter(words)
 vocab = sorted(count,key=count.get,reverse=True)
 
 vocab_to_int = {word:i for i,word in enumerate(vocab,1)}
-
+word_num = len(vocab_to_int)
 print("len(vocab_to_int) = " + str(len(vocab_to_int))) #21337
-
+'''
+f = open("./data/dict.txt", 'w',encoding='utf-8')
+f.write(str(vocab_to_int))
+f.close()
+'''
 
 ## 3 encoding word and label train dev test 
 seq_len = 52
@@ -93,14 +97,6 @@ train_reviews_ints = []
 for each in train_rev:
     train_reviews_ints.append([vocab_to_int[word] for word in each.split()])
 
-
-'''
-review_lens = Counter([len(x) for x in reviews_ints])
-print("Zero-length reviews: {}".format(review_lens[0]))
-print("Maximum review length: {}".format(max(review_lens)))
-
-'''
-'''
 features = np.zeros((len(train_reviews_ints),seq_len),dtype=int)
 features = preprocessing.sequence.pad_sequences(train_reviews_ints,52)
 
@@ -124,7 +120,7 @@ labels = np.array([int(each) for each in labels])
 
 np.save("./data/devFea.npy",features)
 np.save("./data/devLabel.npy",labels)
-'''
+
 test_reviews_ints = []
 for each in test_rev:
     test_reviews_ints.append([vocab_to_int[word] for word in each.split()])
@@ -140,3 +136,28 @@ np.save("./data/testFea.npy",features)
 np.save("./data/testLabel.npy",labels)
 print(features.shape)#(2200, 52)
 print(labels.shape)#(2200,)
+
+'''
+f = open("./data/dict.txt", 'r',encoding='utf-8')
+vocab_to_int = eval(f.read())
+f.close()
+'''
+
+with open("./data/glove.6B.300d.txt", 'r', encoding='utf-8') as f:
+    words = set()
+    word_to_vec = {}
+    for line in f:
+        line = line.strip().split()
+        curr_word = line[0]
+        words.add(curr_word)
+        word_to_vec[curr_word] = np.array(line[1:], dtype=np.float32)
+
+
+static_embeddings = np.zeros([word_num, embed_size])
+
+for word, token in tqdm.tqdm(vocab_to_int.items()):
+    word_vector = word_to_vec.get(word, 0.2 * np.random.random(embed_size) - 0.1)
+    static_embeddings[token-1, :] = word_vector
+
+static_embeddings = static_embeddings.astype(np.float32)
+np.save("./data/static_embeddings.npy",static_embeddings)

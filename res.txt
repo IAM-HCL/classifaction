@@ -1,0 +1,26 @@
+lstm_hiden_size = 256
+lstm_hiden_layers = 1
+EPOCHES = 1
+PS D:\code\TextClassification> python .\train.py
+2019-12-30 18:27:47.886000: W C:\tf_jenkins\home\workspace\rel-win\M\windows\PY\36\tensorflow\core\platform\cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2019-12-30 18:27:47.904273: W C:\tf_jenkins\home\workspace\rel-win\M\windows\PY\36\tensorflow\core\platform\cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+[0.0]
+[0.0234375]
+[0.0]
+[0.1875]
+[0.2578125]
+[0.25]
+Training epoch: 1, Train loss: -15.8532,  dev accuracy: 0.1060
+Test accuracy: 0.1167
+PS D:\code\TextClassification> python .\train.py 第三次
+2019-12-30 18:29:24.878656: W C:\tf_jenkins\home\workspace\rel-win\M\windows\PY\36\tensorflow\core\platform\cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2019-12-30 18:29:24.894668: W C:\tf_jenkins\home\workspace\rel-win\M\windows\PY\36\tensorflow\core\platform\cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+[0.0078125]
+[0.046875]
+[0.03125]
+[0.0390625]
+[0.390625]
+[0.4609375]
+[0.40625]
+Training epoch: 1, Train loss: -18.1176,  dev accuracy: 0.1975
+Test accuracy: 0.2700

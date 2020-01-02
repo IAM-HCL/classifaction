@@ -2,14 +2,15 @@ import numpy as np
 import os
 import tensorflow as tf
 
+import tqdm
 import matplotlib.pyplot as plt
 
 #len(vocab_to_int) = 21337
 embed_size = 300 
 word_num = 21337
 seq_len = 52
-lstm_hiden_size = 256
-lstm_hiden_layers = 2
+lstm_hiden_size = 512
+lstm_hiden_layers = 1
 batch_size = 128
 learning_rate = 0.001
 keep_prob_num = 0.5
@@ -19,9 +20,14 @@ train_fea = np.load("./data/trainFea.npy")
 train_label = np.load("./data/trainLabel.npy")
 dev_fea = np.load("./data/devFea.npy")
 dev_label = np.load("./data/devLabel.npy")
-
 test_fea = np.load("./data/testFea.npy")
 test_label = np.load("./data/testLabel.npy")
+
+
+static_embeddings = np.load("./data/static_embeddings.npy")
+print("data finished\ndata finished\ndata finished\n\n")
+
+
 tf.reset_default_graph()
 
 def get_batch(x, y):
@@ -44,7 +50,7 @@ with tf.name_scope("rnn"):
     
     # embeddings
     with tf.name_scope("embeddings"):
-        embedding_matrix = tf.Variable(tf.random_uniform((word_num,embed_size),-1,1))
+        embedding_matrix = tf.Variable(initial_value=static_embeddings, trainable=False, name="embedding_matrix")
         embed = tf.nn.embedding_lookup(embedding_matrix, inputs, name="embed")
     
     # model
@@ -81,7 +87,6 @@ with tf.name_scope("rnn"):
 
 rnn_train_accuracy = []
 rnn_test_accuracy = []
-
 
 
 
@@ -130,6 +135,9 @@ with tf.Session() as sess:
     writer.close()
 
 
+# INSss[66]:
+
+
 plt.plot(rnn_train_accuracy)
 plt.plot(rnn_test_accuracy)
 plt.ylim(ymin=0.5, ymax=1.01)
@@ -139,6 +147,7 @@ plt.legend(["train", "test"])
 dev_cnt= 0
 dev_cnt_real = 0
 dev_acc = 0.0
+print("test:-----------------------")
 with tf.Session() as sess:
     saver.restore(sess, "checkpoints/rnn")
     for x_tbatch, y_tbatch in get_batch(test_fea, test_label):
@@ -147,6 +156,7 @@ with tf.Session() as sess:
             if(dev_cnt > -1):
                 dev_cnt_real = dev_cnt_real + 1
                 dev_acc = dev_acc + batch_acc[0]
+                print(batch_acc[0])
 
 dev_acc = dev_acc/dev_cnt_real
 print("Test accuracy: {:.4f}".format(dev_acc))
